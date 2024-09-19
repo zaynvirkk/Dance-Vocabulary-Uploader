@@ -3,7 +3,6 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useDropzone } from 'react-dropzone';
-import { PlusCircleIcon, ArrowUpTrayIcon, CloudArrowUpIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
 const firebaseConfig = {
     apiKey: "AIzaSyCDEXkHwMZq1DrcGB_2TJd1R13pwTT68wk",
@@ -47,7 +46,10 @@ function UploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (entries.some(entry => !entry.video)) return;
+    if (entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video)) {
+      setErrorMessage("Please fill in all fields for each entry.");
+      return;
+    }
 
     setIsUploading(true);
     setErrorMessage(null);
@@ -116,37 +118,48 @@ function UploadForm() {
         {!entry.video ? (
           <div
             {...getRootProps()}
-            className={`flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 dark:border-gray-600 border-dashed rounded-md bg-gray-50 dark:bg-gray-700 transition-all duration-300 ease-in-out ${
-              isDragActive ? 'border-indigo-500 dark:border-indigo-400' : 'hover:border-indigo-500 dark:hover:border-indigo-400'
+            className={`flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-md bg-gray-800 transition-all duration-300 ease-in-out ${
+              isDragActive ? 'border-indigo-400' : 'hover:border-indigo-400'
             }`}
           >
             <input {...getInputProps()} />
             <div className="space-y-1 text-center">
-              <CloudArrowUpIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <div className="flex text-sm text-gray-600 dark:text-gray-400">
-                <span className="relative cursor-pointer bg-white dark:bg-gray-800 rounded-md font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 dark:focus-within:ring-offset-gray-800">
+              <div className="mx-auto h-12 w-12 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <div className="flex text-sm text-gray-400">
+                <span className="relative cursor-pointer bg-gray-900 rounded-md font-medium text-indigo-400 hover:text-indigo-300 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500 focus-within:ring-offset-gray-900">
                   Upload a video
                 </span>
                 <p className="pl-1">or drag and drop</p>
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">MP4 up to 10MB</p>
+              <p className="text-xs text-gray-500">MP4 up to 10MB</p>
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-700 rounded-md">
+          <div className="flex items-center justify-between p-4 bg-gray-800 rounded-md">
             <div className="flex items-center">
-              <CloudArrowUpIcon className="h-8 w-8 text-green-500 mr-3" />
+              <div className="h-8 w-8 text-green-500 mr-3">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{entry.video.name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{(entry.video.size / (1024 * 1024)).toFixed(2)} MB</p>
+                <p className="text-sm font-medium text-gray-200">{entry.video.name}</p>
+                <p className="text-xs text-gray-400">{(entry.video.size / (1024 * 1024)).toFixed(2)} MB</p>
               </div>
             </div>
             <button
               type="button"
               onClick={removeVideo}
-              className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition duration-150 ease-in-out"
+              className="text-red-400 hover:text-red-300 transition duration-150 ease-in-out"
             >
-              <XCircleIcon className="h-6 w-6" />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
             </button>
           </div>
         )}
@@ -155,18 +168,18 @@ function UploadForm() {
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-      <h2 className="text-3xl font-bold mb-8 text-center text-gray-800 dark:text-gray-200">Upload Dance Moves</h2>
+    <div className="w-full max-w-lg mx-auto mt-8 p-6 bg-gray-900 rounded-lg shadow-md">
+      <h2 className="text-3xl font-bold mb-8 text-center text-gray-100">Upload Dance Moves</h2>
       {errorMessage && (
-        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+        <div className="mb-4 p-4 bg-red-900 border border-red-700 text-red-100 rounded">
           {errorMessage}
         </div>
       )}
       <form onSubmit={handleSubmit} className="space-y-8">
         {entries.map((entry, index) => (
-          <div key={index} className="border-b pb-8 mb-8">
+          <div key={index} className="border-b border-gray-700 pb-8 mb-8">
             <div className="mb-6">
-              <label htmlFor={`title-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+              <label htmlFor={`title-${index}`} className="block text-sm font-medium text-gray-300 mb-2">Title</label>
               <input
                 id={`title-${index}`}
                 type="text"
@@ -174,17 +187,17 @@ function UploadForm() {
                 onChange={(e) => handleEntryChange(index, 'title', e.target.value)}
                 placeholder="Title of the dance move"
                 required
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition duration-150 ease-in-out"
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white transition duration-150 ease-in-out"
               />
             </div>
             <div className="mb-6">
-              <label htmlFor={`danceStyle-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Dance Style</label>
+              <label htmlFor={`danceStyle-${index}`} className="block text-sm font-medium text-gray-300 mb-2">Dance Style</label>
               <select
                 id={`danceStyle-${index}`}
                 value={entry.danceStyle}
                 onChange={(e) => handleEntryChange(index, 'danceStyle', e.target.value)}
                 required
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition duration-150 ease-in-out"
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white transition duration-150 ease-in-out"
               >
                 <option value="">Select dance style</option>
                 <option value="linear_salsa">Linear Salsa</option>
@@ -193,13 +206,13 @@ function UploadForm() {
               </select>
             </div>
             <div className="mb-6">
-              <label htmlFor={`level-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Level</label>
+              <label htmlFor={`level-${index}`} className="block text-sm font-medium text-gray-300 mb-2">Level</label>
               <select
                 id={`level-${index}`}
                 value={entry.level}
                 onChange={(e) => handleEntryChange(index, 'level', e.target.value)}
                 required
-                className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:text-white transition duration-150 ease-in-out"
+                className="w-full px-4 py-2 bg-gray-800 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white transition duration-150 ease-in-out"
               >
                 <option value="">Select level</option>
                 <option value="1">1 - Beginner</option>
@@ -210,14 +223,14 @@ function UploadForm() {
               </select>
             </div>
             <div className="mb-6">
-              <label htmlFor={`video-${index}`} className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Video</label>
+              <label htmlFor={`video-${index}`} className="block text-sm font-medium text-gray-300 mb-2">Video</label>
               <VideoUploader index={index} entry={entry} />
             </div>
             {entries.length > 1 && (
               <button
                 type="button"
                 onClick={() => removeEntry(index)}
-                className="mt-2 px-3 py-1 text-sm text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition duration-150 ease-in-out"
+                className="mt-2 px-3 py-1 text-sm text-red-400 hover:text-red-300 transition duration-150 ease-in-out"
               >
                 Remove
               </button>
@@ -227,17 +240,21 @@ function UploadForm() {
         <button
           type="button"
           onClick={addEntry}
-          className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition duration-150 ease-in-out"
+          className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-700 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-900 transition duration-150 ease-in-out"
         >
-          <PlusCircleIcon className="h-5 w-5 mr-2" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
           Add Another Dance Move
         </button>
         <button
           type="submit"
-          disabled={isUploading}
-          className={`w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition duration-150 ease-in-out ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={isUploading || entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video)}
+          className={`w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-900 transition duration-150 ease-in-out ${(isUploading || entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video)) ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <ArrowUpTrayIcon className="h-5 w-5 mr-2" />
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+          </svg>
           {isUploading ? 'Uploading...' : 'Upload Dance Moves'}
         </button>
       </form>
