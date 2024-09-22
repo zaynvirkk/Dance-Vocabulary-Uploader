@@ -4,7 +4,7 @@ import { uploadEntryWithVideo } from '../utils/firebaseUtils';
 import EntryForm from './EntryForm';
 import AddEntryButton from './AddEntryButton';
 import SubmitButton from './SubmitButton';
-import { FaExclamationCircle } from 'react-icons/fa';
+import { FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 
 const DEFAULT_TAGS = ['combo', 'step', 'shines', 'rueda'];
 
@@ -16,6 +16,7 @@ function UploadForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [previouslyUsedTags, setPreviouslyUsedTags] = useState<string[]>(DEFAULT_TAGS);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const storedTags = localStorage.getItem('previouslyUsedTags');
@@ -59,13 +60,16 @@ function UploadForm() {
 
     setIsUploading(true);
     setErrorMessage(null);
+    setSuccessMessage(null);
     setUploadProgress(0);
     try {
+      let uploadedCount = 0;
       for (let i = 0; i < entries.length; i++) {
         await uploadEntryWithVideo(entries[i]);
+        uploadedCount++;
         setUploadProgress((i + 1) / entries.length * 100);
       }
-      console.log('Dance moves successfully uploaded!');
+      setSuccessMessage(`Successfully uploaded ${uploadedCount} dance move${uploadedCount !== 1 ? 's' : ''}!`);
       setEntries([{ title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }]);
     } catch (error: any) {
       console.error('Error uploading dance moves: ', error);
@@ -87,7 +91,7 @@ function UploadForm() {
         </header>
         <div className="bg-gray-900 rounded-xl p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-12">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {entries.map((entry, index) => (
                 <EntryForm
                   key={index}
@@ -107,6 +111,15 @@ function UploadForm() {
                 <div>
                   <h3 className="font-semibold text-red-300 mb-1">Error</h3>
                   <p>{errorMessage}</p>
+                </div>
+              </div>
+            )}
+            {successMessage && (
+              <div className="mt-6 bg-green-900 bg-opacity-50 backdrop-blur-sm border border-green-500 text-green-100 p-4 rounded-md flex items-start">
+                <FaCheckCircle className="text-green-500 mr-3 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="font-semibold text-green-300 mb-1">Success</h3>
+                  <p>{successMessage}</p>
                 </div>
               </div>
             )}

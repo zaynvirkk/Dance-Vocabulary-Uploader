@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, setDoc, doc, getDoc, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Entry } from '../types/Entry';
 
@@ -21,12 +21,12 @@ export async function uploadEntries(entries: Entry[]) {
     if (!entry.video) continue;
 
     // Check if video is too big
-    if (entry.video.size > 10 * 1024 * 1024) {
-      throw new Error(`The video "${entry.video.name}" is larger than 10MB. Please upload a smaller file.`);
+    if (entry.video.size > 100 * 1024 * 1024) {
+      throw new Error(`The video "${entry.video.name}" is larger than 100MB. Please upload a smaller file.`);
     }
 
     // Check if a dance move with the same title already exists
-    const titleQuery = query(collection(db, 'danceMoves'), where('title', '==', entry.title));
+    const titleQuery = query(collection(db, 'dance_moves'), where('title', '==', entry.title));
     const titleQuerySnapshot = await getDocs(titleQuery);
     if (!titleQuerySnapshot.empty) {
       throw new Error(`A dance move with the title "${entry.title}" already exists.`);
@@ -62,6 +62,14 @@ export async function uploadEntryWithVideo(entry: Entry) {
     throw new Error('Video and thumbnail are required');
   }
 
+  // Check if a document with the same title already exists
+  const docRef = doc(db, 'danceEntries', entry.title);
+  const docSnap = await getDoc(docRef);
+
+  if (docSnap.exists()) {
+    throw new Error(`A dance move with the title "${entry.title}" already exists.`);
+  }
+
   // Upload video to Firebase Storage
   const videoRef = ref(storage, `videos/${Date.now()}_${entry.video.name}`);
   await uploadBytes(videoRef, entry.video);
@@ -72,7 +80,7 @@ export async function uploadEntryWithVideo(entry: Entry) {
   await uploadBytes(thumbnailRef, entry.thumbnail);
   const thumbnailUrl = await getDownloadURL(thumbnailRef);
 
-  // Create entry document in Firestore
+  // Create entry document in Firestore with the title as the document ID
   const entryData = {
     title: entry.title,
     danceStyle: entry.danceStyle,
@@ -83,5 +91,5 @@ export async function uploadEntryWithVideo(entry: Entry) {
     createdAt: new Date()
   };
 
-  await addDoc(collection(db, 'danceEntries'), entryData);
+  await setDoc(doc(db, 'danceEntries', entry.title), entryData);
 }

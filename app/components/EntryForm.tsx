@@ -83,7 +83,19 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6 space-y-6">
+    <div className="bg-gray-900 rounded-lg p-6 space-y-6 relative">
+      {showRemoveButton && (
+        <button
+          type="button"
+          onClick={() => removeEntry(index)}
+          className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors duration-300 flex items-center justify-center group"
+          title="Remove Entry"
+        >
+          <FaTrash className="w-4 h-4" />
+          <span className="absolute right-full mr-2 bg-red-600 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">Remove</span>
+        </button>
+      )}
+      
       <input
         type="text"
         value={entry.title}
@@ -238,15 +250,6 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
           </label>
         </div>
       </div>
-      {showRemoveButton && (
-        <button
-          type="button"
-          onClick={() => removeEntry(index)}
-          className="mt-4 w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-300 flex items-center justify-center"
-        >
-          <FaTrash className="mr-2" /> Remove Entry
-        </button>
-      )}
     </div>
   );
 }
