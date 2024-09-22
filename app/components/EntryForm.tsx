@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Entry } from '../types/Entry';
 import { FaTrash, FaTimes, FaVideo, FaImage, FaTag } from 'react-icons/fa';
 
@@ -23,7 +24,6 @@ const levels = [
 
 const MAX_VIDEO_SIZE = 100;
 const MAX_THUMBNAIL_SIZE = 20;
-const DEFAULT_TAGS = ['combo', 'step', 'shines', 'rueda'];
 
 function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessage, showRemoveButton, previouslyUsedTags }: EntryFormProps) {
   const MAX_VIDEO_FILE_SIZE = MAX_VIDEO_SIZE * 1024 * 1024;
@@ -227,7 +227,15 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
             <div className="flex flex-col items-center justify-center pt-5 pb-6 px-4 text-center">
               {entry.thumbnail ? (
                 <>
-                  <img src={URL.createObjectURL(entry.thumbnail)} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg mb-2" />
+                  <div className="relative w-24 h-24 mb-2">
+                    <Image
+                      src={URL.createObjectURL(entry.thumbnail)}
+                      alt="Thumbnail"
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-lg"
+                    />
+                  </div>
                   <p className="mb-1 text-sm font-medium text-green-400">{entry.thumbnail.name}</p>
                   <p className="text-xs text-green-400">({(entry.thumbnail.size / (1024 * 1024)).toFixed(2)} MB)</p>
                 </>

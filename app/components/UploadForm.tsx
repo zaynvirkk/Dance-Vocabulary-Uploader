@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Entry } from '../types/Entry';
-import { uploadEntryWithVideo } from '../utils/firebaseUtils';
+import { uploadEntryWithVideo, FirebaseError } from '../utils/firebaseUtils';
 import EntryForm from './EntryForm';
 import AddEntryButton from './AddEntryButton';
 import SubmitButton from './SubmitButton';
@@ -68,8 +68,8 @@ function UploadForm() {
         try {
           await uploadEntryWithVideo(entries[i]);
           uploadedCount++;
-        } catch (error: any) {
-          if (error.message.includes("already exists")) {
+        } catch (error) {
+          if (error instanceof FirebaseError && error.message.includes("already exists")) {
             setErrorMessage(error.message);
             break;
           } else {
@@ -82,9 +82,9 @@ function UploadForm() {
         setSuccessMessage(`Successfully uploaded ${uploadedCount} dance move${uploadedCount !== 1 ? 's' : ''}!`);
         setEntries([{ title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }]);
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error uploading dance moves: ', error);
-      setErrorMessage(error.message);
+      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);
