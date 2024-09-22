@@ -65,12 +65,23 @@ function UploadForm() {
     try {
       let uploadedCount = 0;
       for (let i = 0; i < entries.length; i++) {
-        await uploadEntryWithVideo(entries[i]);
-        uploadedCount++;
+        try {
+          await uploadEntryWithVideo(entries[i]);
+          uploadedCount++;
+        } catch (error: any) {
+          if (error.message.includes("already exists")) {
+            setErrorMessage(error.message);
+            break;
+          } else {
+            throw error;
+          }
+        }
         setUploadProgress((i + 1) / entries.length * 100);
       }
-      setSuccessMessage(`Successfully uploaded ${uploadedCount} dance move${uploadedCount !== 1 ? 's' : ''}!`);
-      setEntries([{ title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }]);
+      if (uploadedCount > 0) {
+        setSuccessMessage(`Successfully uploaded ${uploadedCount} dance move${uploadedCount !== 1 ? 's' : ''}!`);
+        setEntries([{ title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }]);
+      }
     } catch (error: any) {
       console.error('Error uploading dance moves: ', error);
       setErrorMessage(error.message);

@@ -48,7 +48,7 @@ export async function uploadEntries(entries: Entry[]) {
     const videoUrl = await getDownloadURL(videoRef);
 
     // Add dance move data to Firestore
-    await addDoc(collection(db, 'danceMoves'), {
+    await addDoc(collection(db, 'dance_moves'), {
       title: entry.title,
       danceStyle: entry.danceStyle,
       level: entry.level,
@@ -63,20 +63,40 @@ export async function uploadEntryWithVideo(entry: Entry) {
   }
 
   // Check if a document with the same title already exists
-  const docRef = doc(db, 'danceEntries', entry.title);
+  const docRef = doc(db, 'dance_moves', entry.title);
   const docSnap = await getDoc(docRef);
 
   if (docSnap.exists()) {
     throw new Error(`A dance move with the title "${entry.title}" already exists.`);
   }
 
+  // Check if video with the same name already exists
+  const videoRef = ref(storage, `videos/${entry.video.name}`);
+  try {
+    await getDownloadURL(videoRef);
+    throw new Error(`A video with the name "${entry.video.name}" already exists.`);
+  } catch (error: any) {
+    if (error.code !== 'storage/object-not-found') {
+      throw error;
+    }
+  }
+
+  // Check if thumbnail with the same name already exists
+  const thumbnailRef = ref(storage, `thumbnails/${entry.thumbnail.name}`);
+  try {
+    await getDownloadURL(thumbnailRef);
+    throw new Error(`A thumbnail with the name "${entry.thumbnail.name}" already exists.`);
+  } catch (error: any) {
+    if (error.code !== 'storage/object-not-found') {
+      throw error;
+    }
+  }
+
   // Upload video to Firebase Storage
-  const videoRef = ref(storage, `videos/${Date.now()}_${entry.video.name}`);
   await uploadBytes(videoRef, entry.video);
   const videoUrl = await getDownloadURL(videoRef);
 
   // Upload thumbnail to Firebase Storage
-  const thumbnailRef = ref(storage, `thumbnails/${Date.now()}_${entry.thumbnail.name}`);
   await uploadBytes(thumbnailRef, entry.thumbnail);
   const thumbnailUrl = await getDownloadURL(thumbnailRef);
 
@@ -91,5 +111,5 @@ export async function uploadEntryWithVideo(entry: Entry) {
     createdAt: new Date()
   };
 
-  await setDoc(doc(db, 'danceEntries', entry.title), entryData);
+  await setDoc(doc(db, 'dance_moves', entry.title), entryData);
 }
