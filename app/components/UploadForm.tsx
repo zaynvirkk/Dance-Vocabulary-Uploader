@@ -6,7 +6,7 @@ import AddEntryButton from './AddEntryButton';
 import SubmitButton from './SubmitButton';
 import { FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 
-const DEFAULT_TAGS = ['step', 'combo', 'shines', 'rueda'];
+const DEFAULT_TAGS = ['step', 'combo', 'shines', 'rueda', 'performance'];
 
 function UploadForm() {
   const [entries, setEntries] = useState<Entry[]>([
