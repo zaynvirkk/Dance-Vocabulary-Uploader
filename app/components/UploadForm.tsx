@@ -92,15 +92,15 @@ function UploadForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 p-8 font-sans">
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-2 sm:p-8">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-2 text-green-400">
+          <h1 className="text-5xl mb-2 text-green-400">
             Dance Vocabulary
           </h1>
-          <p className="text-xl text-green-600">Upload Dance Moves</p>
+          <p className="text-xl font-[300] text-gray-600">Upload Dance Moves</p>
         </header>
-        <div className="bg-gray-900 rounded-xl p-8 shadow-2xl">
+        <div className="bg-gray-900 rounded-xl p-2 sm:p-8 shadow-2xl">
           <form onSubmit={handleSubmit} className="space-y-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {entries.map((entry, index) => (

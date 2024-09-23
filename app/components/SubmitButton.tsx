@@ -11,7 +11,7 @@ function SubmitButton({ isUploading, isDisabled }: SubmitButtonProps) {
     <button
       type="submit"
       disabled={isDisabled || isUploading}
-      className={`px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md shadow-lg transform hover:scale-105 transition duration-300 ease-in-out flex items-center ${
+      className={`w-full sm:w-auto px-8 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md shadow-lg transform hover:scale-105 transition duration-300 ease-in-out flex items-center ${
         isDisabled || isUploading ? 'opacity-50 cursor-not-allowed' : ''
       }`}
     >

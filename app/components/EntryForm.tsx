@@ -83,7 +83,7 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
   };
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6 space-y-6 relative">
+    <div className="bg-gray-900 rounded-lg p-4 sm:p-6 space-y-6 relative">
       {showRemoveButton && (
         <button
           type="button"
@@ -101,7 +101,7 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
         value={entry.title}
         onChange={(e) => handleEntryChange(index, 'title', e.target.value)}
         placeholder="Title"
-        className="w-full p-3 bg-gray-800 text-white rounded-md"
+        className="w-full p-2 sm:p-3 bg-gray-800 text-white rounded-md"
         required
       />
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -109,7 +109,7 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
           <select
             value={entry.danceStyle}
             onChange={(e) => handleEntryChange(index, 'danceStyle', e.target.value)}
-            className="w-full p-3 bg-gray-800 text-white rounded-md appearance-none"
+            className="w-full p-2 sm:p-3 bg-gray-800 text-white rounded-md appearance-none"
             required
           >
             <option value="">Select Dance Style</option>
@@ -125,7 +125,7 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
           <select
             value={entry.level}
             onChange={(e) => handleEntryChange(index, 'level', e.target.value)}
-            className="w-full p-3 bg-gray-800 text-white rounded-md appearance-none"
+            className="w-full p-2 sm:p-3 bg-gray-800 text-white rounded-md appearance-none"
             required
           >
             <option value="">Select Level</option>
@@ -146,7 +146,7 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
             value={inputTag}
             onChange={handleTagInput}
             placeholder="Add tags (comma-separated)"
-            className="flex-grow p-3 bg-gray-800 text-white rounded-md"
+            className="flex-grow p-2 sm:p-3 bg-gray-800 text-white rounded-md"
           />
         </div>
         <div className="flex flex-wrap mt-2">

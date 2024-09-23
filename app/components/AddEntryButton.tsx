@@ -10,7 +10,7 @@ function AddEntryButton({ onClick }: AddEntryButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md shadow-lg transform hover:scale-105 transition duration-300 ease-in-out flex items-center"
+      className="w-full sm:w-auto px-6 py-3 border border-green-600 text-green-600 hover:bg-green-600 hover:text-white font-semibold rounded-md shadow-lg transform hover:scale-105 transition duration-300 ease-in-out flex items-center"
     >
       <FaPlus className="mr-2" /> Add New Entry
     </button>
