@@ -10,7 +10,7 @@ const DEFAULT_TAGS = ['step', 'combo', 'shines', 'rueda', 'performance'];
 
 function UploadForm() {
   const [entries, setEntries] = useState<Entry[]>([
-    { title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }
+    { title: '', danceStyle: '', level: '', tags: ['step'], video: null, thumbnail: null }
   ]);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -43,7 +43,7 @@ function UploadForm() {
   };
 
   const addEntry = () => {
-    setEntries([...entries, { title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }]);
+    setEntries([...entries, { title: '', danceStyle: '', level: '', tags: ['step'], video: null, thumbnail: null }]);
   };
 
   const removeEntry = (index: number) => {
@@ -80,7 +80,7 @@ function UploadForm() {
       }
       if (uploadedCount > 0) {
         setSuccessMessage(`Successfully uploaded ${uploadedCount} dance move${uploadedCount !== 1 ? 's' : ''}!`);
-        setEntries([{ title: '', danceStyle: '', level: '', tags: [], video: null, thumbnail: null }]);
+        setEntries([{ title: '', danceStyle: '', level: '', tags: ['step'], video: null, thumbnail: null }]);
       }
     } catch (error) {
       console.error('Error uploading dance moves: ', error);
