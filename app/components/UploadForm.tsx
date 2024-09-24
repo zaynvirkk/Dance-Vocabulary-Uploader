@@ -53,7 +53,7 @@ function UploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video || !entry.thumbnail)) {
+    if (entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video)) {
       setErrorMessage("Please fill in all required fields for each entry.");
       return;
     }
@@ -138,7 +138,7 @@ function UploadForm() {
               <AddEntryButton onClick={addEntry} />
               <SubmitButton 
                 isUploading={isUploading} 
-                isDisabled={entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video || !entry.thumbnail)} 
+                isDisabled={entries.some(entry => !entry.title || !entry.danceStyle || !entry.level || !entry.video)} 
               />
             </div>
             {isUploading && (
