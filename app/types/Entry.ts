@@ -5,4 +5,5 @@ export interface Entry {
   tags: string[];
   video: File | null;
   thumbnail: File | null;
+  fileSize?: string;
 }

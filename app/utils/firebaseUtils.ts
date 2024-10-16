@@ -67,8 +67,9 @@ export async function uploadEntries(entries: Entry[]) {
 }
 
 export async function uploadEntryWithVideo(entry: Entry) {
-    if (!entry.video || !entry.thumbnail) {
-        throw new FirebaseError('Video and thumbnail are required');
+    if (typeof entry.video !== 'object' || !(entry.video instanceof File) || 
+        typeof entry.thumbnail !== 'object' || !(entry.thumbnail instanceof File)) {
+        throw new FirebaseError('Video and thumbnail must be File objects');
     }
 
     // Check if a document with the same title already exists
@@ -117,6 +118,7 @@ export async function uploadEntryWithVideo(entry: Entry) {
         tags: entry.tags,
         videoUrl: videoUrl,
         thumbnailUrl: thumbnailUrl,
+        fileSize: entry.fileSize,
         createdAt: new Date()
     };
 
