@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
 import { buttonStyle } from '@/app/styles/uiStyles';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 
 interface TrimModalProps {
-  video: File;
+  video: File | string;
   onClose: () => void;
   onSave: (trimmedVideo: File) => void;
 }
@@ -17,14 +15,16 @@ function TrimModal({ video, onClose, onSave }: TrimModalProps) {
   const [endTime, setEndTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const ffmpegRef = useRef(new FFmpeg());
 
   useEffect(() => {
-    const url = URL.createObjectURL(video);
-    setVideoUrl(url);
-    return () => URL.revokeObjectURL(url);
+    if (video instanceof File) {
+      const url = URL.createObjectURL(video);
+      setVideoUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (typeof video === 'string') {
+      setVideoUrl(video);
+    }
   }, [video]);
 
   useEffect(() => {
@@ -38,44 +38,31 @@ function TrimModal({ video, onClose, onSave }: TrimModalProps) {
   }, [videoUrl]);
 
   const handleTrim = async () => {
-    if (!videoUrl) return;
+    if (!videoRef.current) return;
     setIsProcessing(true);
-    setProgress(0);
 
-    try {
-      const ffmpeg = ffmpegRef.current;
-      await ffmpeg.load();
+    const stream = (videoRef.current as any).captureStream();
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    const chunks: Blob[] = [];
 
-      ffmpeg.on('progress', ({ progress }) => {
-        setProgress(Math.round(progress * 100));
-      });
-
-      const inputFileName = 'input.mp4';
-      const outputFileName = 'output.mp4';
-
-      await ffmpeg.writeFile(inputFileName, await fetchFile(video));
-
-      await ffmpeg.exec([
-        '-ss', startTime.toFixed(2),
-        '-i', inputFileName,
-        '-t', (endTime - startTime).toFixed(2),
-        '-c:v', 'libx264',
-        '-c:a', 'aac',
-        '-y',
-        outputFileName
-      ]);
-
-      const data = await ffmpeg.readFile(outputFileName);
-      const trimmedBlob = new Blob([data], { type: 'video/mp4' });
-      const trimmedFile = new File([trimmedBlob], 'trimmed_video.mp4', { type: 'video/mp4' });
-
+    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' });
+      const trimmedFile = new File([blob], 'trimmed_video.webm', { type: 'video/webm' });
       onSave(trimmedFile);
       onClose();
-    } catch (error) {
-      console.error('Error trimming video:', error);
-    } finally {
+    };
+
+    videoRef.current.currentTime = startTime;
+    mediaRecorder.start();
+
+    videoRef.current.play();
+
+    setTimeout(() => {
+      mediaRecorder.stop();
+      videoRef.current!.pause();
       setIsProcessing(false);
-    }
+    }, (endTime - startTime) * 1000);
   };
 
   const handleSliderChange = (value: number | number[]) => {
@@ -112,17 +99,6 @@ function TrimModal({ video, onClose, onSave }: TrimModalProps) {
             <span>{formatTime(endTime)}</span>
           </div>
         </div>
-        {isProcessing && (
-          <div className="mb-4">
-            <div className="bg-gray-700 rounded-full h-2 overflow-hidden">
-              <div 
-                className="h-full bg-blue-500 transition-all duration-300 ease-out"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <p className="text-white mt-2 text-center">Processing: {progress}%</p>
-          </div>
-        )}
         <div className="flex justify-end space-x-2">
           <button
             className={`${buttonStyle} bg-blue-500 hover:bg-blue-600`}

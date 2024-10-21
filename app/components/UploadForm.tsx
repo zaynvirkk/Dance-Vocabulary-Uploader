@@ -31,17 +31,24 @@ function UploadForm() {
     }
   }, []);
 
+  useEffect(() => {
+    console.log('UploadForm - Entries state changed:', entries);
+  }, [entries]);
+
   const handleEntryChange = (index: number, field: keyof Entry, value: string | string[] | File | null) => {
-    const newEntries = [...entries];
-    newEntries[index] = { ...newEntries[index], [field]: value };
-    
-    // If the field is 'video' or 'thumbnail', update the fileSize
-    if ((field === 'video' || field === 'thumbnail') && value instanceof File) {
-      const fileSizeMB = (value.size / (1024 * 1024)).toFixed(2);
-      newEntries[index].fileSize = fileSizeMB;
-    }
-    
-    setEntries(newEntries);
+    console.log('UploadForm - handleEntryChange called:', index, field, value);
+    setEntries(prevEntries => {
+      const newEntries = [...prevEntries];
+      newEntries[index] = { ...newEntries[index], [field]: value };
+      
+      if ((field === 'video' || field === 'thumbnail') && value instanceof File) {
+        const fileSizeMB = (value.size / (1024 * 1024)).toFixed(2);
+        newEntries[index].fileSize = fileSizeMB;
+      }
+      
+      console.log('UploadForm - Updated entries:', newEntries);
+      return newEntries;
+    });
 
     if (field === 'tags') {
       updatePreviouslyUsedTags(value as string[]);

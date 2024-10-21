@@ -1,10 +1,8 @@
-import React, { useState, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { Entry } from '../types/Entry';
 import { FaTrash } from 'react-icons/fa';
-import TrimModal from '@/app/components/TrimModal';
 import FileUpload from '@/app/components/FileUpload';
 import TagInput from '@/app/components/TagInput';
-import { handleFileChange } from '@/app/utils/fileHandlers';
 import { danceStyles, levels, MAX_VIDEO_SIZE, MAX_THUMBNAIL_SIZE } from '@/app/constants/formConstants';
 import { secondaryBg, inputStyle, selectStyle, glassEffect, buttonStyle } from '@/app/styles/uiStyles';
 
@@ -20,48 +18,9 @@ interface EntryFormProps {
 }
 
 function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessage, showRemoveButton, previouslyUsedTags, recommendedTags }: EntryFormProps) {
-  const [showCropModal, setShowCropModal] = useState(false);
-  const [showTrimModal, setShowTrimModal] = useState(false);
-  const [tempThumbnail, setTempThumbnail] = useState<File | null>(null);
-  const [tempVideo, setTempVideo] = useState<File | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
-
-  const handleCropModalSave = useCallback((croppedImage: File, previewUrl: string) => {
-    console.log("handleCropModalSave called", { croppedImage, previewUrl });
-    
-    try {
-      handleEntryChange(index, 'thumbnail', croppedImage);
-      console.log("handleEntryChange called for thumbnail");
-
-      setThumbnailPreview(previewUrl);
-      console.log("Thumbnail preview set");
-
-      setTempThumbnail(croppedImage);
-      console.log("Temp thumbnail set");
-
-      setShowCropModal(false);
-      console.log("Crop modal closed");
-
-      console.log("After handleCropModalSave", { entry, thumbnailPreview: previewUrl });
-    } catch (error) {
-      console.error("Error in handleCropModalSave:", error);
-    }
-  }, [handleEntryChange, index, entry]);
-
-  const handleFileChangeWrapper = (index: number, field: keyof Entry, value: string | File | string[] | null) => {
-    console.log("handleFileChangeWrapper called", { field, value });
-    if (value instanceof File) {
-      const e = { target: { files: [value] } } as unknown as React.ChangeEvent<HTMLInputElement>;
-      handleFileChange(e, field as 'video' | 'thumbnail', setErrorMessage, setTempVideo, () => {}, setShowTrimModal, () => {}, setIsUploading, setUploadProgress);
-    } else {
-      handleEntryChange(index, field, value);
-    }
-    console.log("After handleEntryChange", { entry });
-  };
-
-  console.log("EntryForm rendered", { entry, showCropModal, tempThumbnail, thumbnailPreview, handleCropModalSave: !!handleCropModalSave });
+  useEffect(() => {
+    console.log('EntryForm - Entry changed:', entry);
+  }, [entry]);
 
   return (
     <div className={`${secondaryBg} ${glassEffect} rounded-lg p-4 sm:p-6 space-y-6 relative`}>
@@ -129,34 +88,17 @@ function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessa
           type="video"
           entry={entry}
           index={index}
-          handleEntryChange={handleFileChangeWrapper}
-          isUploading={isUploading}
-          uploadProgress={uploadProgress}
+          handleEntryChange={handleEntryChange}
           maxSize={MAX_VIDEO_SIZE}
-          setIsUploading={setIsUploading}
-          setUploadProgress={setUploadProgress}
         />
         <FileUpload
           type="thumbnail"
           entry={entry}
           index={index}
-          handleEntryChange={handleFileChangeWrapper}
+          handleEntryChange={handleEntryChange}
           maxSize={MAX_THUMBNAIL_SIZE}
-          setIsUploading={setIsUploading}
-          setUploadProgress={setUploadProgress}
         />
       </div>
-
-      {showTrimModal && tempVideo && (
-        <TrimModal
-          tempVideo={tempVideo}
-          setShowTrimModal={setShowTrimModal}
-          handleEntryChange={handleEntryChange}
-          index={index}
-          setIsUploading={setIsUploading}
-          setUploadProgress={setUploadProgress}
-        />
-      )}
     </div>
   );
 }
