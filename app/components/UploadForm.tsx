@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Entry } from '../types/Entry';
-import { uploadEntryWithVideo, FirebaseError } from '../utils/firebaseUtils';
+import { uploadEntryWithVideo, DynamoDBError } from '../utils/dynamoDbUtils';
 import EntryForm from './EntryForm';
 import AddEntryButton from './AddEntryButton';
 import SubmitButton from './SubmitButton';
@@ -96,7 +96,8 @@ function UploadForm() {
           await uploadEntryWithVideo(validEntries[i]);
           uploadedCount++;
         } catch (error) {
-          if (error instanceof FirebaseError && error.message.includes("already exists")) {
+          console.error('Error uploading entry:', error);
+          if (error instanceof DynamoDBError && error.message.includes("already exists")) {
             setErrorMessage(error.message);
             break;
           } else {
@@ -111,7 +112,7 @@ function UploadForm() {
       }
     } catch (error) {
       console.error('Error uploading dance moves: ', error);
-      setErrorMessage(error instanceof Error ? error.message : 'An unknown error occurred');
+      setErrorMessage(error instanceof Error ? `${error.name}: ${error.message}` : 'An unknown error occurred');
     } finally {
       setIsUploading(false);
       setUploadProgress(0);

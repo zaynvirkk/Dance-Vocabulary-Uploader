@@ -1,10 +1,8 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useDropzone } from 'react-dropzone';
+import React, { useRef, useState } from 'react';
 import { Entry } from '../types/Entry';
 import { FaCheckCircle, FaVideo, FaImage } from 'react-icons/fa';
-import { FiUpload } from 'react-icons/fi';
+import { uploadBgStyle } from '@/app/styles/uiStyles';
 import CropModal from './CropModal';
-import { uploadBgStyle, buttonStyle } from '@/app/styles/uiStyles';
 
 interface FileUploadProps {
   type: 'video' | 'thumbnail';
@@ -15,53 +13,85 @@ interface FileUploadProps {
 }
 
 function FileUpload({ type, entry, index, handleEntryChange, maxSize }: FileUploadProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [dragActive, setDragActive] = useState(false);
   const [showCropModal, setShowCropModal] = useState(false);
   const [tempFile, setTempFile] = useState<File | null>(null);
 
-  useEffect(() => {
-    console.log(`FileUpload (${type}) - Current file:`, type === 'video' ? entry.video : entry.thumbnail);
-  }, [entry, type]);
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      const file = acceptedFiles[0];
-      console.log(`FileUpload (${type}) - File dropped:`, file);
-      if (type === 'thumbnail') {
-        setTempFile(file);
-        setShowCropModal(true);
-      } else {
-        handleEntryChange(index, 'video', file);
-        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
-        handleEntryChange(index, 'fileSize', fileSizeMB);
-      }
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
-  }, [type, handleEntryChange, index]);
+  };
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: type === 'video' ? { 'video/*': [] } : { 'image/*': [] },
-    maxSize: maxSize,
-    multiple: false
-  });
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
 
-  const handleCropSave = useCallback((croppedFile: File) => {
-    console.log(`FileUpload (${type}) - Cropped file saved:`, croppedFile);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files);
+    }
+  };
+
+  const handleFiles = (files: FileList) => {
+    if (files[0].size > maxSize) {
+      alert(`File size exceeds ${maxSize / (1024 * 1024)}MB limit.`);
+      return;
+    }
+    if (type === 'thumbnail') {
+      setTempFile(files[0]);
+      setShowCropModal(true);
+    } else {
+      handleEntryChange(index, type, files[0]);
+      const fileSizeMB = (files[0].size / (1024 * 1024)).toFixed(2);
+      handleEntryChange(index, 'fileSize', fileSizeMB);
+    }
+  };
+
+  const handleCropSave = (croppedFile: File) => {
     handleEntryChange(index, 'thumbnail', croppedFile);
+    const fileSizeMB = (croppedFile.size / (1024 * 1024)).toFixed(2);
+    handleEntryChange(index, 'fileSize', fileSizeMB);
     setShowCropModal(false);
     setTempFile(null);
-  }, [handleEntryChange, index, type]);
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
+  };
 
   const file = type === 'video' ? entry.video : entry.thumbnail;
 
   return (
     <div className="relative h-full aspect-square">
       <div
-        {...getRootProps()}
         className={`cursor-pointer ${uploadBgStyle} rounded-lg ${type === 'thumbnail' && file ? '' : 'p-6'} text-center transition-all duration-300 h-full flex flex-col justify-center items-center ${
-          isDragActive ? 'bg-opacity-70' : ''
+          dragActive ? 'bg-opacity-70' : ''
         } ${file ? 'bg-green-500 bg-opacity-20 border-green-500' : ''}`}
+        onDragEnter={handleDrag}
+        onDragLeave={handleDrag}
+        onDragOver={handleDrag}
+        onDrop={handleDrop}
+        onClick={openFileDialog}
       >
-        <input {...getInputProps()} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept={type === 'video' ? 'video/*' : 'image/*'}
+          onChange={handleChange}
+          style={{ display: 'none' }}
+        />
         <div className="flex flex-col items-center w-full h-full justify-center">
           {file ? (
             <>
@@ -70,7 +100,7 @@ function FileUpload({ type, entry, index, handleEntryChange, maxSize }: FileUplo
                   <FaCheckCircle className="text-4xl text-white" />
                 </div>
               )}
-              { type === 'video' && <p className="text-gray-300 mb-2">{file.name}</p>}
+              {type === 'video' && <p className="text-gray-300 mb-2">{file.name}</p>}
               {type === 'thumbnail' && (
                 <div className="w-full h-full relative">
                   <img
@@ -89,7 +119,7 @@ function FileUpload({ type, entry, index, handleEntryChange, maxSize }: FileUplo
                 <FaImage className="text-6xl text-gray-300 mb-4" />
               )}
               <p className="text-gray-300 mb-2">
-                {isDragActive
+                {dragActive
                   ? `Drop the ${type} here`
                   : `Drag and drop ${type} here, or click to select`}
               </p>
