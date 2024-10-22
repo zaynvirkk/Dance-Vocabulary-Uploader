@@ -23,6 +23,7 @@ function UploadForm() {
   const [previouslyUsedTags, setPreviouslyUsedTags] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const storedTags = localStorage.getItem('previouslyUsedTags');
@@ -48,6 +49,12 @@ function UploadForm() {
     if (field === 'tags') {
       updatePreviouslyUsedTags(value as string[]);
     }
+
+    // Clear error message when form is changed
+    if (isSubmitted) {
+      setErrorMessage(null);
+      setIsSubmitted(false);
+    }
   };
 
   const updatePreviouslyUsedTags = (newTags: string[]) => {
@@ -67,6 +74,8 @@ function UploadForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitted(true);
+    
     const validEntries = entries.filter(entry => 
       entry.title && 
       entry.danceStyle && 
@@ -92,7 +101,7 @@ function UploadForm() {
           uploadedCount++;
         } catch (error) {
           console.error('Error uploading entry:', error);
-          if (error instanceof DynamoDBError) {
+          if (error instanceof DynamoDBError && error.message.includes("already exists")) {
             setErrorMessage(error.message);
             break;
           } else {
@@ -104,6 +113,7 @@ function UploadForm() {
       if (uploadedCount > 0) {
         setSuccessMessage(`Successfully uploaded ${uploadedCount} dance move${uploadedCount !== 1 ? 's' : ''}!`);
         setEntries([{ title: '', danceStyle: '', level: '', tags: ['step'], video: null, thumbnail: null }]);
+        setIsSubmitted(false);
       }
     } catch (error) {
       console.error('Error uploading dance moves: ', error);
@@ -135,14 +145,14 @@ function UploadForm() {
                     index={index}
                     handleEntryChange={handleEntryChange}
                     removeEntry={removeEntry}
-                    setErrorMessage={setErrorMessage}
+                    setErrorMessage={() => {}} // Pass an empty function here
                     showRemoveButton={entries.length > 1}
                     recommendedTags={RECOMMENDED_TAGS}
                     previouslyUsedTags={previouslyUsedTags}
                   />
                 ))}
               </div>
-              {errorMessage && (
+              {isSubmitted && errorMessage && (
                 <div className="mt-6 bg-red-900 bg-opacity-50 backdrop-blur-sm border border-red-500 text-red-100 p-4 rounded-md flex items-start">
                   <FaExclamationCircle className="text-red-500 mr-3 mt-1 flex-shrink-0" />
                   <div>
