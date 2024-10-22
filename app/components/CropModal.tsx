@@ -44,29 +44,15 @@ function CropModal({ tempThumbnail, setShowCropModal, onSave }: CropModalProps) 
     setCompletedCrop(crop);
   }, []);
 
-  useEffect(() => {
-    console.log("CropModal useEffect", { onSaveType: typeof onSave, onSave });
-    console.log("CropModal useEffect");
-  }, [onSave]);
-
   const handleSave = async () => {
-    console.log("handleSave called in CropModal");
     if (imgRef.current && completedCrop) {
       try {
         const croppedImageBlob = await getCroppedImg(imgRef.current, completedCrop);
-        console.log("Cropped image blob created", { blobSize: croppedImageBlob.size });
 
         const croppedImageFile = new File([croppedImageBlob], 'thumbnail.jpg', { type: 'image/jpeg' });
-        console.log("Cropped image file created", { fileSize: croppedImageFile.size });
 
-        const previewUrl = URL.createObjectURL(croppedImageBlob);
-        console.log("Preview URL created", { previewUrl });
-
-        console.log("Before calling onSave in CropModal", { onSaveType: typeof onSave, onSave });
-        
         if (typeof onSave === 'function') {
           onSave(croppedImageFile);
-          console.log("onSave called successfully");
         } else {
           console.error("onSave is not a function", { onSaveType: typeof onSave, onSave });
         }
@@ -79,8 +65,6 @@ function CropModal({ tempThumbnail, setShowCropModal, onSave }: CropModalProps) 
       console.error("Cannot save: imgRef or completedCrop is null", { imgRef: !!imgRef.current, completedCrop });
     }
   };
-
-  console.log("CropModal rendered", { onSaveType: typeof onSave, onSave });
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

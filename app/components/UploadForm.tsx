@@ -6,6 +6,7 @@ import AddEntryButton from './AddEntryButton';
 import SubmitButton from './SubmitButton';
 import { FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import { primaryBg, secondaryBg, glassEffect, primaryColor, gradientBg, buttonStyle } from '@/app/styles/uiStyles';
+import { testAWSConnection } from '../utils/testAWS';
 
 const RECOMMENDED_TAGS = [
   'step', 'combo', 'shines', 'rueda', 'performance',
@@ -31,12 +32,7 @@ function UploadForm() {
     }
   }, []);
 
-  useEffect(() => {
-    console.log('UploadForm - Entries state changed:', entries);
-  }, [entries]);
-
   const handleEntryChange = (index: number, field: keyof Entry, value: string | string[] | File | null) => {
-    console.log('UploadForm - handleEntryChange called:', index, field, value);
     setEntries(prevEntries => {
       const newEntries = [...prevEntries];
       newEntries[index] = { ...newEntries[index], [field]: value };
@@ -46,7 +42,6 @@ function UploadForm() {
         newEntries[index].fileSize = fileSizeMB;
       }
       
-      console.log('UploadForm - Updated entries:', newEntries);
       return newEntries;
     });
 
@@ -97,7 +92,7 @@ function UploadForm() {
           uploadedCount++;
         } catch (error) {
           console.error('Error uploading entry:', error);
-          if (error instanceof DynamoDBError && error.message.includes("already exists")) {
+          if (error instanceof DynamoDBError) {
             setErrorMessage(error.message);
             break;
           } else {

@@ -16,17 +16,11 @@ function TagInput({ entry, index, handleEntryChange, previouslyUsedTags, recomme
 
   useEffect(() => {
     const storedTags = localStorage.getItem('usedTags');
-    console.log('Stored tags from localStorage:', storedTags);
     if (storedTags) {
       const parsedTags = JSON.parse(storedTags);
-      console.log('Parsed tags:', parsedTags);
       setLocalStorageTags(parsedTags);
     }
   }, []);
-
-  useEffect(() => {
-    console.log('localStorageTags state:', localStorageTags);
-  }, [localStorageTags]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(e.target.value);

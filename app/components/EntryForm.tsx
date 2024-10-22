@@ -18,10 +18,6 @@ interface EntryFormProps {
 }
 
 function EntryForm({ entry, index, handleEntryChange, removeEntry, setErrorMessage, showRemoveButton, previouslyUsedTags, recommendedTags }: EntryFormProps) {
-  useEffect(() => {
-    console.log('EntryForm - Entry changed:', entry);
-  }, [entry]);
-
   return (
     <div className={`${secondaryBg} ${glassEffect} rounded-lg p-4 sm:p-6 space-y-6 relative`}>
       {showRemoveButton && (
